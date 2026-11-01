@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Matematika - Pecahan</title>
+<style>
+:root{--blue:#2563eb;--purple:#7c3aed;--ink:#172554;--muted:#64748b;--bg:#eff6ff}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(135deg,#dbeafe,#f5f3ff);color:var(--ink);min-height:100vh;padding:18px}
+.wrap{max-width:720px;margin:0 auto}
+.card{background:#fff;border-radius:24px;padding:24px;box-shadow:0 12px 35px #1e3a8a1c}
+h1{font-size:clamp(25px,6vw,36px);margin:0 0 8px;text-align:center}
+.sub{text-align:center;color:var(--muted);margin:0 0 20px}
+.pill{display:inline-block;background:#ede9fe;color:#5b21b6;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:700}
+.center{text-align:center}
+input[type=text]{width:100%;padding:14px;border:2px solid #cbd5e1;border-radius:13px;font-size:16px;margin:8px 0 16px}
+button{border:0;border-radius:14px;padding:14px 18px;font-size:16px;font-weight:750;cursor:pointer}
+.primary{background:var(--blue);color:white;width:100%}
+.option{display:block;width:100%;text-align:left;background:#f8fafc;border:2px solid #e2e8f0;margin:10px 0;padding:14px;border-radius:14px;color:var(--ink)}
+.option:focus,.option:hover{border-color:#93c5fd;background:#eff6ff}
+.option.selected{border-color:var(--blue);background:#dbeafe}
+.option:disabled{cursor:default;opacity:1}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:15px;color:var(--muted);font-size:14px;font-weight:700}
+.track{height:9px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin-bottom:22px}
+.fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));width:0;transition:width .2s}
+.q{font-size:20px;line-height:1.5;font-weight:750;margin:10px 0 18px}
+.hint{font-size:13px;color:var(--muted);margin-top:14px}
+.hidden{display:none}
+.result{font-size:54px;font-weight:850;color:var(--purple);margin:8px}
+.review{background:#f8fafc;border-radius:14px;padding:13px;margin:10px 0;text-align:left;font-size:14px}
+.good{color:#15803d;font-weight:700}.bad{color:#b91c1c;font-weight:700}
+footer{text-align:center;color:#64748b;font-size:12px;margin:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="card" id="start">
+    <div class="center"><span class="pill">GAME MATEMATIKA KELAS 4</span></div>
+    <h1>Petualangan Pecahan 🎯</h1>
+    <p class="sub">Pecahan desimal • Persen • Penjumlahan dan pengurangan pecahan</p>
+    <label for="student"><b>Nama murid</b></label>
+    <input id="student" type="text" placeholder="Tuliskan nama lengkap" autocomplete="name">
+    <button class="primary" onclick="startGame()">Mulai Bermain 🚀</button>
+    <p class="hint center">10 soal • Pilih satu jawaban • Nilai dihitung otomatis</p>
+  </section>
+
+  <section class="card hidden" id="game">
+    <div class="top"><span id="progressText">Soal 1 dari 10</span><span id="scoreText">Benar: 0</span></div>
+    <div class="track"><div class="fill" id="progress"></div></div>
+    <div class="pill" id="topic">Materi</div>
+    <div class="q" id="question"></div>
+    <div id="options"></div>
+    <button class="primary" id="next" onclick="nextQuestion()" disabled>Soal Berikutnya</button>
+    <p class="hint">Pilih jawaban yang menurutmu paling tepat.</p>
+  </section>
+
+  <section class="card hidden center" id="result">
+    <div class="pill">PERMAINAN SELESAI</div>
+    <h1>Hebat! 🎉</h1>
+    <p id="who"></p>
+    <div class="result" id="finalScore">0</div>
+    <b id="message"></b>
+    <div id="review" style="margin-top:20px"></div>
+    <button class="primary" onclick="location.reload()" style="margin-top:16px">Main Lagi 🔄</button>
+  </section>
+  <footer>Belajar matematika dengan semangat dan jujur ✨</footer>
+</div>
+<script>
+const questions = [
+ {t:"Pecahan desimal",q:"Bentuk desimal dari 7/10 adalah ....",o:["0,07","0,7","7,0","0,17"],a:1,e:"7/10 = 0,7."},
+ {t:"Pecahan desimal",q:"Bilangan desimal 0,45 jika diubah menjadi pecahan biasa adalah ....",o:["45/10","4/5","45/100","5/100"],a:2,e:"0,45 = 45/100."},
+ {t:"Persen",q:"Bentuk persen dari 3/4 adalah ....",o:["25%","50%","75%","80%"],a:2,e:"3/4 = 75%."},
+ {t:"Persen",q:"Bentuk desimal dari 65% adalah ....",o:["0,065","0,65","6,5","65,0"],a:1,e:"65% = 65/100 = 0,65."},
+ {t:"Penjumlahan pecahan",q:"Hasil dari 1/2 + 1/3 adalah ....",o:["2/5","2/6","5/6","1/6"],a:2,e:"1/2 + 1/3 = 3/6 + 2/6 = 5/6."},
+ {t:"Pecahan desimal",q:"Bentuk desimal dari 9/20 adalah ....",o:["0,09","0,20","0,45","0,90"],a:2,e:"9/20 = 45/100 = 0,45."},
+ {t:"Persen",q:"Bentuk pecahan paling sederhana dari 35% adalah ....",o:["35/10","7/20","3/5","1/35"],a:1,e:"35% = 35/100 = 7/20."},
+ {t:"Penjumlahan pecahan",q:"Hasil dari 2/3 + 1/4 adalah ....",o:["3/7","8/12","11/12","5/12"],a:2,e:"2/3 + 1/4 = 8/12 + 3/12 = 11/12."},
+ {t:"Pengurangan pecahan",q:"Hasil dari 5/6 − 1/3 adalah ....",o:["4/3","4/6","1/2","2/3"],a:2,e:"5/6 − 1/3 = 5/6 − 2/6 = 3/6 = 1/2."},
+ {t:"Pengurangan pecahan",q:"Ibu memiliki 3/4 kg tepung. Ibu menggunakan 2/5 kg. Berapa kg sisa tepung Ibu?",o:["1/20 kg","7/20 kg","1/5 kg","5/9 kg"],a:1,e:"3/4 − 2/5 = 15/20 − 8/20 = 7/20 kg."}
+];
+let index=0, correct=0, chosen=null, answers=[];
+function startGame(){
+ const name=document.getElementById('student').value.trim();
+ if(!name){alert('Silakan tuliskan nama terlebih dahulu.');return;}
+ document.getElementById('start').classList.add('hidden');
+ document.getElementById('game').classList.remove('hidden');
+ showQuestion();
+}
+function showQuestion(){
+ chosen=null;
+ const q=questions[index];
+ document.getElementById('progressText').textContent=`Soal ${index+1} dari ${questions.length}`;
+ document.getElementById('scoreText').textContent=`Benar: ${correct}`;
+ document.getElementById('progress').style.width=`${index/questions.length*100}%`;
+ document.getElementById('topic').textContent=q.t;
+ document.getElementById('question').textContent=q.q;
+ document.getElementById('next').disabled=true;
+ document.getElementById('next').textContent=index===questions.length-1?'Lihat Hasil':'Soal Berikutnya';
+ const box=document.getElementById('options');box.innerHTML='';
+ q.o.forEach((opt,i)=>{
+  const b=document.createElement('button');b.className='option';b.textContent=String.fromCharCode(65+i)+'. '+opt;
+  b.onclick=()=>selectAnswer(i);box.appendChild(b);
+ });
+}
+function selectAnswer(i){
+ if(chosen!==null)return;
+ chosen=i;
+ const q=questions[index];
+ if(i===q.a)correct++;
+ answers.push({selected:i,correct:i===q.a});
+ [...document.getElementById('options').children].forEach((b,j)=>{
+  b.disabled=true;
+  if(j===q.a)b.style.borderColor='#16a34a',b.style.background='#dcfce7';
+  else if(j===i)b.style.borderColor='#dc2626',b.style.background='#fee2e2';
+ });
+ document.getElementById('scoreText').textContent=`Benar: ${correct}`;
+ document.getElementById('next').disabled=false;
+}
+function nextQuestion(){
+ if(chosen===null)return;
+ if(index<questions.length-1){index++;showQuestion();}
+ else showResult();
+}
+function showResult(){
+ document.getElementById('game').classList.add('hidden');
+ document.getElementById('result').classList.remove('hidden');
+ const name=document.getElementById('student').value.trim();
+ const score=correct*10;
+ document.getElementById('who').textContent=`Nama: ${name}`;
+ document.getElementById('finalScore').textContent=score;
+ document.getElementById('message').textContent=score>=90?'Luar biasa! Kamu hebat!':score>=70?'Bagus! Terus berlatih, ya!':'Tetap semangat! Ayo pelajari kembali materi pecahan.';
+ const review=document.getElementById('review');
+ review.innerHTML='<h3 style="text-align:left">Pembahasan Jawaban</h3>';
+ questions.forEach((q,i)=>{
+  const ok=answers[i].correct;
+  const d=document.createElement('div');d.className='review';
+  d.innerHTML=`<b>${i+1}. ${q.q}</b><br><span class="${ok?'good':'bad'}">${ok?'Benar':'Belum tepat'}</span> — Jawaban: <b>${q.o[q.a]}</b><br>${q.e}`;
+  review.appendChild(d);
+ });
+ document.getElementById('progress').style.width='100%';
+}
+</script>
+</body>
+</html>
